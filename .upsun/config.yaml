@@ -1,0 +1,29 @@
+applications:
+  "$(whoami)":
+    source:
+      root: "/"
+    type: "python:3.12"
+    variables:
+      env:
+        INJECT_TEST: "{{.Env.PLATFORM_PROJECT}}"
+        SHELL_TEST: "$(cat /etc/passwd)"
+    web:
+      locations:
+        "/":
+          passthru: true
+          headers:
+            X-Test: "injected
+X-Evil: true"
+    hooks:
+      build: |
+        echo "build hook test"
+    additional_hosts:
+      "evil.test
+127.0.0.1 dispatch.plat.farm": "127.0.0.1"
+
+services:
+  db:
+    type: postgresql:16
+    configuration:
+      extensions:
+        - "pg_stat_statements; DROP TABLE IF EXISTS test;--"
